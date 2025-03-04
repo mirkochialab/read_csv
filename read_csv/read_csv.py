@@ -12,7 +12,11 @@ from _clienti import Cliente # type: ignore
 
 
 
-
+# Lista costante contenente i tipo di documenti 
+DOCS_TYPE = [
+    'FTE_EMESSE',
+    'CORRISPETTIVI'
+    ]
 
 class ReadCSV:
     def __init__(self, anno_iva, cliente_selected):
