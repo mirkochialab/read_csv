@@ -37,92 +37,112 @@ class DOCS_TYPES:
 
 
 class ReadCSV:
-    def __init__(self, anno_iva, cliente):
+    def __init__(self, 
+                 cliente,
+                 anno_iva,
+                 mese_iva
+                 
+                 ):
 
-        self.anno_iva = anno_iva
+        # Parametri cliente
         self.cliente = cliente
+        
+        # Parametri IVA
+        self.anno_iva = anno_iva
+        self.mese_iva = mese_iva
+        self.dt_chiusura_iva = pd.to_datetime(f'{anno_iva}-{mese_iva}-01').to_period('M').end_time
 
 
 
-
-
-        # path file
+        # Parametri file CSV 
         self.lettera_gdrive = "G"
         self.path_gdrive = os.path.join(self.lettera_gdrive + ":\\", "Il mio Drive")
         self.path_cliente = os.path.join(self.path_gdrive, "CLIENTI", self.cliente['folder_name'])
         self.path_folder_iva = os.path.join(self.path_cliente, "IVA", str(self.anno_iva))
         
 
-        print(self.path_folder_iva)
+        
 
     def _get_csv_path(self, doc_type, quarter):
 
         # Costruisce il nome del file
         filename = f"{doc_type}__{self.cliente['folder_name']}__{quarter}.csv"
         # Costruisce il percorso completo
-        full_path = os.path.join(self.path_folder_iva, doc_type, 'csv', filename)
+        # full_path = os.path.join(self.path_folder_iva, doc_type, 'csv', filename)
         return filename
 
 
     def load_csv(self, doc_type):
-        '''
-        I file csv sono salvati nella cartella del cliente selezionato
-        nella specifica cartella relativamente all'anno iva selezionato
-        e suddivisi in ulteriori cartelle per tipo di documento:
-        - FTE_EMESSE
-        - FTE_RICEVUTE
-        - CORRISPETTIVI
-        - FTE_MESSE_A_DISPOSIZIONE
         
-        '''
+        '''FAI LE COSE SEMPLICI'''
+        
+        path_folder_csv = os.path.join(self.path_folder_iva,
+                                       doc_type,
+                                       'csv')
+        
+        
+        # Ottieni la lista di tutti i file CSV nella cartella
+        files_csv = [f for f in os.listdir(path_folder_csv) if f.endswith('.csv')]
+        
+        # Itera i file CSV
+        for file in files_csv:
 
-        obj = {
-            'pathfolder_iva':
-            }
+            # Percorso completo del file CSV
+            path_file_csv = os.path.join(path_folder_csv, file)
 
-        quarters  = pd.date_range(start=f'{self.anno_iva}-01-01', 
-                                  end=f'{self.anno_iva}-12-31', 
-                                  freq='QS')
-
-        for i, q in enumerate(quarters):
+            # Utilizzo della funzione Path per le statistiche sul file CSV
+            file_csv_stat = Path(path_file_csv).stat()
+            dt_create_csv = pd.to_datetime(file_csv_stat.st_ctime_ns)
             
-            csv_filename = self._get_csv_path(doc_type, q.strftime('%Y-%m-%d'))
+            # ### Controllo di coerenza sui file 
+            # Ricavo le date di competenza di ogni singolo file CSV dal nome
+            date_from_csv_filename = file.replace('.csv','').split("__")[2]
+            dt_csv_quarter_ini = pd.to_datetime(date_from_csv_filename)
+            dt_csv_quarter_end = dt_csv_quarter_ini.to_period('Q').end_time
             
-            csv_full_path = os.path.join(self.path_folder_iva, 
-                                         doc_type, 
-                                         'csv', 
-                                         csv_filename)
+            print(file)
+            print("-->", "Data creazione file:", dt_create_csv)
+            print("-->", "Data inizio periodo:", dt_csv_quarter_ini)
+            print("-->", "Data fine   periodo:", dt_csv_quarter_end)
+            print("-->", "Data chiusura IVA  :", self.dt_chiusura_iva)
             
-            file_csv = Path(csv_full_path)
+            # # Segnala file non aggiornato con errore
+            file_deprecated = False
             
-            file_csv_datetime_create = None
-            
-            file_check_update = None
-            
-            
-            if file_csv.exists():
-
-                stat = file_csv.stat()
+            # Caso 1 (data di chiusura inferiore a fine trimestre)
+            if self.dt_chiusura_iva <= dt_csv_quarter_end:
+                # Se la data del file è inferiore della chiusura è deprecato
+                if dt_create_csv <= self.dt_chiusura_iva:
+                    file_deprecated = True
                 
-                file_csv_datetime_create = pd.to_datetime(stat.st_ctime_ns).isoformat()
+                # Crea ALERT offsettando di 5 giorni
+                if dt_create_csv <= (self.dt_chiusura_iva.floor('ms') + pd.DateOffset(days=5)):
+                    print("offset")
                 
-                # TODO CHECK FILE CREATO CON DATA COERENTE AL AI DATI CONTENUTI
-            
-            obj.update({f'{self.anno_iva}-Q{i+1}': {
-                'csv_filename': csv_filename,
-                'date_create': file_csv_datetime_create 
-                }
+            # Caso 2 (data di chiusura superiore a fine trimestre)
+            if self.dt_chiusura_iva >= dt_create_csv:
+                # Se la data del file è inferiore alla fine del quarter è deprecato
+                if dt_create_csv <= dt_csv_quarter_end:
+                    file_deprecated = True
                 
-                })
- 
-        print(json.dumps(obj, indent=4))           
+                
+                # Crea alert offsettando di 5 giorni
+                if dt_create_csv <= (dt_csv_quarter_end.floor('ms') + pd.DateOffset(days=5)):
+                    print("offset")
+                
+            # Se il file è deprecato vai in errore
+            if file_deprecated:
+                raise("ATTENZIONE! il file:", file, "è troppo vecchio!")
+            else:
+                print("-->", 'Data file coerente!')
 
-        return  obj
         
 
 
 cliente_selected = Cliente.mongelli_giacinta
 
-rc = ReadCSV(2025, cliente_selected)
+rc = ReadCSV(cliente_selected, 2025, 2)
 
 data = rc.load_csv(DOCS_TYPES.FTE_EMESSE)
+
+data = rc.load_csv(DOCS_TYPES.FTE_RICEVUTE)
