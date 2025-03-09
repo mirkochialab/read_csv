@@ -20,14 +20,20 @@ anno_iva = 2025
 mese_iva = 2
 
 rc = ReadCSV(cliente_selected, anno_iva, mese_iva)
+# %%
+
 
 rc._move_csv_to_client_folder()
 
 dfs_corrispett = rc.process_corrispettivi()
 rc.xlsx_corrispettivi(dfs_corrispett)
+# %%
+
 
 dfs_fte_emesse = rc.process_fte(DOCS_TYPES.FTE_EMESSE)
 rc.xlsx_fte(dfs_fte_emesse)
+# %%
+
 
 dfs_fte_ricevu = rc.process_fte(DOCS_TYPES.FTE_RICEVUTE)
 rc.xlsx_fte(dfs_fte_ricevu)

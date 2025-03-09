@@ -186,6 +186,7 @@ def xlsx_fte(self, dataframe):
     fullpath_xlsx = os.path.join(self.path_folder_iva, doc_type)
     
     if os.path.exists(fullpath_xlsx):
+        print()
         print("⚠️ ATTENZIONE: File già creato!")
     else:
         wb.save(fullpath_xlsx)
