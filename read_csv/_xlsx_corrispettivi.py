@@ -18,7 +18,7 @@ locale.setlocale(locale.LC_TIME, 'it_IT.utf8')
 from constant import DOCS_TYPES
 
 
-def xlsx_corrispettivi(self, dataframe, filename="corrispettivi.xlsx"):
+def xlsx_corrispettivi(self, dataframe, doc_type="CORRISPETTIVI"):
     
     if dataframe is None:
         return
@@ -240,17 +240,20 @@ def xlsx_corrispettivi(self, dataframe, filename="corrispettivi.xlsx"):
 
 
 
+        
+    # SALVATAGGIO
+    filename = self.make_filename_xlsx(doc_type)
     
-    # -------------- FINE BLOCCO RIEPILOGHI ----------------
-    filename = "{}_{}_{}_{}.xlsx".format(self.anno_iva,
-                                            DOCS_TYPES.CORRISPETTIVI,
-                                            self.cliente_folder,
-                                            self.dt_chiusura_iva.strftime("%Y-%m")
-                                            )     
-    # Salva il file
-    wb.save(filename)
-    print()
-    print(f"File {filename} salvato con successo!")
+    fullpath_xlsx = os.path.join(self.path_folder_iva, doc_type)
     
+    if os.path.exists(fullpath_xlsx):
+        print("⚠️ ATTENZIONE: File già creato!")
+    else:
+        wb.save(fullpath_xlsx)
+        
+    # Apri il file automaticamente
+    os.system(f'"{filename}"')
+    
+       
     # Apri il file
     os.startfile(filename)

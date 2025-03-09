@@ -179,19 +179,17 @@ def xlsx_fte(self, dataframe):
         ws[f"{col}{total_row}"].font = header_font
         ws[f"{col}{total_row}"].border = border_style
     
-    # Nome del file
-    filename = "{}_{}_{}_{}.xlsx".format(
-        self.anno_iva,
-        doc_type,
-        self.cliente_folder,
-        self.dt_chiusura_iva.strftime("%Y-%m")
-    )
     
-    # Salva il file
-    wb.save(filename)
-    print()
-    print(f"File {filename} salvato con successo!")
+    # SALVATAGGIO
+    filename = self.make_filename_xlsx(doc_type)
     
+    fullpath_xlsx = os.path.join(self.path_folder_iva, doc_type)
+    
+    if os.path.exists(fullpath_xlsx):
+        print("⚠️ ATTENZIONE: File già creato!")
+    else:
+        wb.save(fullpath_xlsx)
+        
     # Apri il file automaticamente
     os.system(f'"{filename}"')
 
