@@ -18,7 +18,7 @@ def process_corrispettivi(self):
     # Linea
     print()
     print()
-    print(doc_type.ljust(100, '-'))
+    print("📟", doc_type.ljust(100, '-'))
     
     if not df.empty:
         # Controlla e segnala eventuali dati duplicati prima dell'eliminazione
@@ -40,7 +40,7 @@ def process_corrispettivi(self):
 
         
         df_mth_sum = df[['Imponibile', 'IVA', 'TOTALE', 'Data e ora rilevazione']].groupby(
-            pd.Grouper(key='Data e ora rilevazione', freq='M')).sum().reset_index()
+            pd.Grouper(key='Data e ora rilevazione', freq='ME')).sum().reset_index()
 
 
         # Dataframe IVA mese

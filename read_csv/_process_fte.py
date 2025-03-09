@@ -76,7 +76,7 @@ def process_fte(self, doc_type):
             key_grouper = 'Data ricezione'
         
         df_mth_sum = df[['Imponibile', 'IVA', 'TOTALE', key_grouper]].groupby(
-            pd.Grouper(key=key_grouper, freq='M')).sum().reset_index()
+            pd.Grouper(key=key_grouper, freq='ME')).sum().reset_index()
         
         # Dataframe IVA mese
         print()

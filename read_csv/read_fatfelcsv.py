@@ -15,11 +15,17 @@ class FatFelCSV:
         self.anno_iva = anno_iva
     
         
-    def load(self, ):
+    def load(self):
     
         # Carica il CSV
-        df_ffc = pd.read_csv("FATFELCSV.csv", sep=";", encoding="latin-1")
-        
+        file_name = r"G:/Il mio Drive/FILE UTILI/_PYTHON/ivapy_beta/read_csv/read_csv/read_csv/FATFELCSV.csv"
+       
+        try:
+            df_ffc = pd.read_csv(file_name, sep=";", encoding="latin-1")
+            # Continua con l'elaborazione del dataframe
+        except Exception as e:
+            print(f"Errore durante la lettura del file: {e}")
+    
         # Pulizia dei nomi delle colonne: rimuove spazi iniziali e finali
         df_ffc.columns = df_ffc.columns.str.strip()
         

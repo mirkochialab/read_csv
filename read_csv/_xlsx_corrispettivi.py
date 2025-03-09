@@ -15,7 +15,6 @@ import locale
 # Imposta la lingua in italiano
 locale.setlocale(locale.LC_TIME, 'it_IT.utf8')  
 
-from constant import DOCS_TYPES
 
 
 def xlsx_corrispettivi(self, dataframe, doc_type="CORRISPETTIVI"):
@@ -244,17 +243,14 @@ def xlsx_corrispettivi(self, dataframe, doc_type="CORRISPETTIVI"):
     # SALVATAGGIO
     filename = self.make_filename_xlsx(doc_type)
     
-    fullpath_xlsx = os.path.join(self.path_folder_iva, doc_type)
+    fullpath_xlsx = os.path.join(self.path_folder_iva, doc_type, filename)
     
     if os.path.exists(fullpath_xlsx):
         print()
         print("⚠️ ATTENZIONE: File già creato!")
     else:
         wb.save(fullpath_xlsx)
-        
-    # Apri il file automaticamente
-    os.system(f'"{filename}"')
-    
-       
+           
     # Apri il file
-    os.startfile(filename)
+    print("Apro il file", filename)
+    os.startfile(fullpath_xlsx)

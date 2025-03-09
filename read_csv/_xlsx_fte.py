@@ -19,6 +19,10 @@ locale.setlocale(locale.LC_TIME, 'it_IT.utf8')
 
 def xlsx_fte(self, dataframe):
     
+    # Se il dataframe è vuoto ciao
+    if dataframe is None:
+        return
+    
     doc_type = list(dataframe.keys())[0]
     df = dataframe[doc_type][0]
     
@@ -29,7 +33,7 @@ def xlsx_fte(self, dataframe):
         key_date = 'Data ricezione'
         
     # Assicurati che la colonna 'key_date' sia in formato datetime
-    df[key_date] = pd.to_datetime(df[key_date], dayfirst=True)
+    # df[key_date] = pd.to_datetime(df[key_date], dayfirst=True)
 
     # Filtra in base alla periodicità del contribuente
     if self.periodicity_iva == "M":
@@ -41,11 +45,12 @@ def xlsx_fte(self, dataframe):
         df = df[df[key_date].dt.to_period("Q") == self.dt_chiusura_iva.to_period("Q")]
     
     # Seleziona le colonne che hanno nel testo la parola 'Data' o 'Periodo'
-    date_cols = df.filter(regex='Data|Periodo').columns
+    # date_cols = df.filter(regex='Data|Periodo').columns
     
     # Converti in formato "%d/%m/%Y" solo se il tipo è datetime
-    for col in date_cols:
-        df[col] = pd.to_datetime(df[col], errors='coerce', dayfirst=True).dt.strftime("%d/%m/%Y")
+    df = df.copy()
+    for col in ['Data emissione', 'Data ricezione']:
+        df.loc[:, col] = df[col].dt.strftime("%d/%m/%Y")
     
     # Crea un nuovo workbook
     wb = Workbook()
@@ -183,17 +188,17 @@ def xlsx_fte(self, dataframe):
     # SALVATAGGIO
     filename = self.make_filename_xlsx(doc_type)
     
-    fullpath_xlsx = os.path.join(self.path_folder_iva, doc_type)
+    fullpath_xlsx = os.path.join(self.path_folder_iva, doc_type, filename)
     
     if os.path.exists(fullpath_xlsx):
         print()
         print("⚠️ ATTENZIONE: File già creato!")
     else:
         wb.save(fullpath_xlsx)
-        
-    # Apri il file automaticamente
-    os.system(f'"{filename}"')
-
+           
+    # Apri il file
+    print("Apro il file", filename)
+    os.startfile(fullpath_xlsx)
 
 
 
