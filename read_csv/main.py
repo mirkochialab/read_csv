@@ -7,6 +7,8 @@ Created on Sun Mar  9 16:12:44 2025
 import sys
 from read_csv import ReadCSV
 from constant import DOCS_TYPES
+# %%
+
 
 
 clienti_path = r"G:\Il mio Drive\FILE UTILI\_PYTHON\ivapy"
@@ -14,7 +16,7 @@ sys.path.insert(1, clienti_path)
 from _clienti import Cliente  # type: ignore
 
 
-cliente_selected = Cliente.beauty_lux_srl
+cliente_selected = Cliente.mongelli_giacinta
 
 anno_iva = 2025
 mese_iva = 2
@@ -24,7 +26,7 @@ mese_iva = 2
 
 rc = ReadCSV(cliente_selected, anno_iva, mese_iva)
 
-# rc._move_csv_to_client_folder()
+rc._move_csv_to_client_folder()
 
 
 

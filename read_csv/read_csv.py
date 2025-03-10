@@ -7,14 +7,12 @@ Created on 2025/03/04 10:43:31
 import os
 import pandas as pd
 from pathlib import Path
+from read_fatfelcsv import FatFelCSV
 
 
 
 
 
-# import warnings
-
-# warnings.filterwarnings('ignore')
 
 
 class ReadCSV:
@@ -44,8 +42,13 @@ class ReadCSV:
         self.path_folder_iva = os.path.join(
             self.path_cliente, "IVA", str(self.anno_iva))
 
+        # Parametri file CSV FatFelCSV
+        self.solo_contabilizzate = True # Verifica abbinamenti solo per le contabilizzate!
+        
         # Cartella download file csv
         self.path_download = str(Path.home() / "Downloads")
+        
+        
 
     def _get_path_folder_csv(self, doc_type):
 
@@ -64,7 +67,8 @@ class ReadCSV:
         date_from_csv_filename = file_csv.replace('.csv', '').split("__")[2]
         dt_csv_quarter_ini = pd.to_datetime(date_from_csv_filename)
         dt_csv_quarter_end = dt_csv_quarter_ini.to_period('Q').end_time
-
+        
+        # ### DEBUG 
         # print(file)
         # print("-->", "Data creazione file:", dt_create_csv)
         # print("-->", "Data inizio periodo:", dt_csv_quarter_ini)
@@ -169,7 +173,12 @@ class ReadCSV:
             df = pd.DataFrame()
 
         return df
-
+    
+    def _load_ffc(self):
+                
+        return FatFelCSV(self.cliente, self.anno_iva, self.solo_contabilizzate)
+        
+    
     from _csv_manager import _move_csv_to_client_folder
 
     from _process_corrispettivi import process_corrispettivi

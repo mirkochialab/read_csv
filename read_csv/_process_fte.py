@@ -5,7 +5,6 @@ Created on Fri Mar  7 07:19:04 2025
 @author: Mirko
 """
 
-import os
 import pandas as pd
 from constant import DOCS_TYPES
 from read_fatfelcsv import FatFelCSV
@@ -38,14 +37,14 @@ def process_fte(self, doc_type):
 
         
         # ### Abbina il file csv dell'Ade al csv FATFELCSV
-        
-        ffc = FatFelCSV(self.cliente, self.anno_iva)
+        # Carica i dati - parametro 'solo_contabilizzate=True'
+        ffc = self._load_ffc().df_ffc
         
         if doc_type == DOCS_TYPES.FTE_EMESSE:
             
-            df_ffc = ffc.get_fte_attive()
+            df_ffc = ffc['df_att']
         else:
-            df_ffc = ffc.get_fte_passive()
+            df_ffc = ffc['df_pas']
 
 
         # Unione dei DataFrame sulla colonna "Identificativo SDI" e "Sdi/file"

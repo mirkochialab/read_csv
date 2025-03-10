@@ -6,6 +6,7 @@ Created on Sat Mar  8 18:12:34 2025
 """
 
 import pandas as pd
+import numpy as np
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.styles import Font, PatternFill, Border, Side, Alignment
@@ -15,7 +16,7 @@ import locale
 # Imposta la lingua in italiano
 locale.setlocale(locale.LC_TIME, 'it_IT.utf8')  
 
-# from constant import DOCS_TYPES
+
 
 def xlsx_fte(self, dataframe):
     
@@ -32,8 +33,6 @@ def xlsx_fte(self, dataframe):
     else:
         key_date = 'Data ricezione'
         
-    # Assicurati che la colonna 'key_date' sia in formato datetime
-    # df[key_date] = pd.to_datetime(df[key_date], dayfirst=True)
 
     # Filtra in base alla periodicità del contribuente
     if self.periodicity_iva == "M":
@@ -44,14 +43,31 @@ def xlsx_fte(self, dataframe):
         periodo_str = f"Trimestre {trimestre} {self.anno_iva}"
         df = df[df[key_date].dt.to_period("Q") == self.dt_chiusura_iva.to_period("Q")]
     
-    # Seleziona le colonne che hanno nel testo la parola 'Data' o 'Periodo'
-    # date_cols = df.filter(regex='Data|Periodo').columns
     
-    # Converti in formato "%d/%m/%Y" solo se il tipo è datetime
-    df = df.copy()
-    for col in ['Data emissione', 'Data ricezione']:
-        df.loc[:, col] = df[col].dt.strftime("%d/%m/%Y")
+    # Selezione colonne specifiche
+    if doc_type == "FTE_EMESSE":
+        df = df.copy()
+        df['Data ricezione'] = ""
+
     
+    colonne_da_mantenere = ["Protocollo MIVA", 
+                            "Numero fattura / Documento", 
+                            "Tipo documento", 
+                            "Data emissione",
+                            "Data ricezione", 
+                            "Denominazione cliente" if doc_type == "FTE_EMESSE" else "Denominazione fornitore", 
+                            "Imponibile", "IVA", "TOTALE"]
+    
+    df = df[colonne_da_mantenere]
+        
+    # Converti in formato "%d/%m/%Y"
+    if doc_type == "FTE_EMESSE":
+        df['Data emissione'] = df['Data emissione'].dt.strftime("%d/%m/%Y")
+    else:
+        cols_dt = ['Data emissione', 'Data ricezione']
+        for col in cols_dt:
+            df[col] = df[col].dt.strftime("%d/%m/%Y")
+            
     # Crea un nuovo workbook
     wb = Workbook()
     wb.remove(wb.active)  # Rimuove il foglio predefinito
@@ -115,30 +131,6 @@ def xlsx_fte(self, dataframe):
     
     # Stacco riga
     ws.append([])
-    
-    # Selezione colonne specifiche
-    if doc_type == "FTE_EMESSE":
-        
-        df["Data ricezione"] = ""  # Aggiungi colonna vuota per uniformare la tabella
-        
-        colonne_da_mantenere = ["Protocollo MIVA", 
-                                "Numero fattura / Documento", 
-                                "Tipo documento", 
-                                "Data emissione",
-                                "Data ricezione", 
-                                "Denominazione cliente", 
-                                "Imponibile", "IVA", "TOTALE"]
-        
-    else:
-        colonne_da_mantenere = ["Protocollo MIVA", 
-                                "Numero fattura / Documento", 
-                                "Tipo documento", 
-                                "Data emissione", 
-                                "Data ricezione", 
-                                "Denominazione fornitore", 
-                                "Imponibile", "IVA", "TOTALE"]
-    
-    df = df[colonne_da_mantenere]
     
     # Scrittura intestazione tabella dati
     row_idx = 5

@@ -8,12 +8,16 @@ import pandas as pd
 
 
 class FatFelCSV:
-    def __init__(self, cliente, anno_iva):
+    def __init__(self, cliente, anno_iva, solo_contabilizzate):
         
         self.cliente = cliente
         self.cf_cli = cliente['cf']
         self.anno_iva = anno_iva
-    
+        
+        
+        # Carica i dati quando inizializzi la classe
+        # il parametro solo_contabilizzate è di default=True
+        self.df_ffc = self.get_data(solo_contabilizzate)
         
     def load(self):
     
@@ -44,23 +48,20 @@ class FatFelCSV:
         # Rimuove il prefisso "ID-" e converte in intero, gestendo eventuali errori
         df_ffc["Identificativo SDI"] = df_ffc["Identificativo SDI"].str.replace("ID-", "", regex=True).astype(float).astype("Int64")
 
-        
         # Filtra i record che contengono il codice fiscale nella colonna "Cod.fiscale Ditta"
         df_ffc_cliente = df_ffc[df_ffc["Cod.fiscale Ditta"].str.contains(f"CF-{self.cf_cli}", na=False)]
 
         # Filtra per anno iva sulla base della colonna di Data registrazione che deve essere uguale all'anno 2025
         df_ffc_cliente = df_ffc_cliente[df_ffc_cliente["Data registrazione"].dt.year == self.anno_iva]
-        
+                
         return df_ffc_cliente
         
-    def get_fte_attive(self):
+    def get_data(self, solo_contabilizzate):
 
         df = self.load()        
-        
-        # Fatture attive
-        df_att = df[df["Tipo fattura"].str.strip().eq("Fat. Attiva")]
-        
-        df_att_mini = df_att[
+                
+        # Filtra colonne specifiche
+        df_mini = df[
             ['Cod.fiscale Ditta', 'Ditta', 'Rag.sociale', 'Tipo fattura',
              # 'Data sistema', 'HHMMSS', 
              'Identificativo SDI',
@@ -71,7 +72,9 @@ class FatFelCSV:
              # 'Causale trasporto', 'Utente', 'Utente Contabiliz.',
              # 'Data Contabilizz.', 'Flusso', 'Data notifica', 'Codice Anagen.',
              'Rag.soc. cli/for FE', 'Totale Ivato', 
-             # 'Totale pagato', 'Differenza',  'Contabilizzazione', 'Tipo registraz. Iva', 'Dt.doc.registraz.Iva',
+             # 'Totale pagato', 'Differenza',  
+             'Contabilizzazione', 
+             #'Tipo registraz. Iva', 'Dt.doc.registraz.Iva',
              'N.doc.registraz.Iva', 
              # 'Causale registraz.Iva', 'Descrizione riga',
              # 'Quantità riga', 'Prezzo riga', 'Al. IVA riga', 'Importo riga',
@@ -82,35 +85,16 @@ class FatFelCSV:
              ]
             ]
         
-        return df_att_mini
-
-    def get_fte_passive(self):
-
-        df = self.load()        
+        # Filtra le sole contabilizzate
+        if solo_contabilizzate:
+            df_mini = df_mini[df_mini["Contabilizzazione"].str.contains("SI", na=False)]
         
         # Fatture attive
-        df_pass = df[df["Tipo fattura"].str.strip().eq("Fat. Passiva")]
+        df_att = df_mini[df_mini["Tipo fattura"].str.strip().eq("Fat. Attiva")]
         
-        df_pass_mini = df_pass[
-            ['Cod.fiscale Ditta', 'Ditta', 'Rag.sociale', 'Tipo fattura',
-             # 'Data sistema', 'HHMMSS', 
-             'Identificativo SDI',
-             # 'Tipo estrazione', 'Codice cli/for', 'Cod. ditta contabil.', 'Sezionale', 'Codice SDI',
-             # 'Partita IVA cli/for', 'Cod.fiscale cli/for', 
-             'Data registrazione', 'N.docum.originale', 'Data documento', 'Protocollo MIVA',
-             # 'Numero Linea', 'Prog. Linea', 'HUB-ID', 'Tipo documento FEL',
-             # 'Causale trasporto', 'Utente', 'Utente Contabiliz.',
-             # 'Data Contabilizz.', 'Flusso', 'Data notifica', 'Codice Anagen.',
-             'Rag.soc. cli/for FE', 'Totale Ivato', 
-             # 'Totale pagato', 'Differenza',  'Contabilizzazione', 'Tipo registraz. Iva', 'Dt.doc.registraz.Iva',
-             'N.doc.registraz.Iva', 
-             # 'Causale registraz.Iva', 'Descrizione riga',
-             # 'Quantità riga', 'Prezzo riga', 'Al. IVA riga', 'Importo riga',
-             # 'IdCodice Cedente', 'IdCodice Cessionario', 'Data Ddt', 'Numero Ddt',
-             # 'Data Ddt2', 'Numero Ddt2', 'Conservato', 'Data ultimo stato',
-             # 'Ora ultimo stato', 'Solo esterometro', 'CoGe Auto', 'Data contab.',
-             # 'Sconto', '%Sconto', 'Sc.Importo'
-             ]
-            ]
+        # Fatture passive
+        df_pas = df_mini[df_mini["Tipo fattura"].str.strip().eq("Fat. Passiva")]
         
-        return df_pass_mini
+        
+        return {'df_att': df_att,
+                'df_pas': df_pas}
