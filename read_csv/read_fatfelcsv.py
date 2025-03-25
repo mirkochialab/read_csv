@@ -53,6 +53,9 @@ class FatFelCSV:
 
         # Filtra per anno iva sulla base della colonna di Data registrazione che deve essere uguale all'anno 2025
         df_ffc_cliente = df_ffc_cliente[df_ffc_cliente["Data registrazione"].dt.year == self.anno_iva]
+
+        # Trasforma la colonna "Totale Ivato" in float
+        df_ffc_cliente["Totale Ivato"] = df_ffc_cliente["Totale Ivato"].str.replace(",", ".").astype(float)
                 
         return df_ffc_cliente
         

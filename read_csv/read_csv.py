@@ -8,7 +8,7 @@ import os
 import pandas as pd
 from pathlib import Path
 from read_fatfelcsv import FatFelCSV
-
+from constant import DOCS_TYPES
 
 
 
@@ -48,11 +48,26 @@ class ReadCSV:
         # Cartella download file csv
         self.path_download = str(Path.home() / "Downloads")
         
-        
+
+
 
     def _get_path_folder_csv(self, doc_type):
 
         return os.path.join(self.path_folder_iva, doc_type, 'csv')
+
+    def _check_folder_tree(self):
+        
+        for doc_type in DOCS_TYPES.as_list():
+            
+            path_doc_type = os.path.join(self.path_folder_iva, doc_type)
+            
+            # Crea le cartelle se non esistono
+            Path(path_doc_type).mkdir(parents=True, exist_ok=True) 
+            
+            # Crea le cartelle csv se non esistono
+            Path(os.path.join(path_doc_type, 'csv')).mkdir(parents=True, exist_ok=True) 
+            
+            
 
     def _check_file_coerence(self, path_folder_csv, file_csv):
 
@@ -69,7 +84,7 @@ class ReadCSV:
         dt_csv_quarter_end = dt_csv_quarter_ini.to_period('Q').end_time
         
         # ### DEBUG 
-        # print(file)
+        # print(file_csv)
         # print("-->", "Data creazione file:", dt_create_csv)
         # print("-->", "Data inizio periodo:", dt_csv_quarter_ini)
         # print("-->", "Data fine   periodo:", dt_csv_quarter_end)
@@ -102,19 +117,21 @@ class ReadCSV:
 
         # Se il file è deprecato vai in errore
         if file_deprecated:
-            raise ("ATTENZIONE! il file:", file_csv, "è troppo vecchio!")
+            os.startfile(path_folder_csv)
+            print("ATTENZIONE! il file:", file_csv, "è troppo vecchio!")
+            raise ("ERRORE CRITICO, file troppo vecchio!")
         else:
             pass
             # print(f"{file_csv} formalmente corretto!")
 
-    def _load_csv(self, doc_type):
-
-        # Ottieni la path della cartella dei csv relativi ai documenti IVA
-        path_folder_csv = self._get_path_folder_csv(doc_type)
-
-        # Ottieni la lista di tutti i file CSV nella cartella
-        files_csv = [f for f in os.listdir(
-            path_folder_csv) if f.endswith('.csv')]
+    def _load_csv(self, doc_type, path_folder_csv):
+        # Ottieni la lista di tutti i file CSV nella cartella che 
+        # nel nome del file contengono la parola della variabile doc_type 
+        # e il nome self.cliente_folder
+        files_csv = [
+            file for file in os.listdir(path_folder_csv)
+            if file.endswith('.csv') and doc_type in file and self.cliente_folder in file
+        ]
 
         # Lista per contenere i DataFrame
         dataframes = []
@@ -186,4 +203,5 @@ class ReadCSV:
     from _xlsx_corrispettivi import xlsx_corrispettivi
     from _xlsx_fte import xlsx_fte
     from _utils import make_filename_xlsx
+    from _utils import print_note
 

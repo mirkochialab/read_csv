@@ -189,8 +189,8 @@ def xlsx_fte(self, dataframe):
         wb.save(fullpath_xlsx)
            
     # Apri il file
-    print("Apro il file", filename)
-    os.startfile(fullpath_xlsx)
+    # print("Apro il file", filename)
+    # os.startfile(fullpath_xlsx)
 
 
 

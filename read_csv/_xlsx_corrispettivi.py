@@ -252,5 +252,5 @@ def xlsx_corrispettivi(self, dataframe, doc_type="CORRISPETTIVI"):
         wb.save(fullpath_xlsx)
            
     # Apri il file
-    print("Apro il file", filename)
-    os.startfile(fullpath_xlsx)
+    # print("Apro il file", filename)
+    # os.startfile(fullpath_xlsx)
