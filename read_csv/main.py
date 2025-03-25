@@ -15,15 +15,15 @@ sys.path.insert(1, clienti_path)
 from _clienti import Cliente  # type: ignore
 
 
-cliente_selected = Cliente.mongelli_giacinta
+cliente_selected = Cliente.moroni_jessica
 
 
 
-anno_iva = 2024
+anno_iva = 2025
 
-mese_iva_start = 12
+mese_iva_start = 2
 
-mese_iva_end = 12
+mese_iva_end = 2
 
 
 # rc = ReadCSV(cliente_selected, anno_iva, mese_iva_end)
@@ -49,7 +49,7 @@ for m in range(mese_iva_start, mese_iva_end+1):
         
     dfs_corrispett = rc.process_corrispettivi()
     # zz = dfs_corrispett[0]
-    # rc.xlsx_corrispettivi(dfs_corrispett)
+    rc.xlsx_corrispettivi(dfs_corrispett)
     
     
     dfs_fte_emesse = rc.process_fte(DOCS_TYPES.FTE_EMESSE)

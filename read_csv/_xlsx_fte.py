@@ -25,7 +25,7 @@ def xlsx_fte(self, dataframe):
         return
     
     doc_type = list(dataframe.keys())[0]
-    df = dataframe[doc_type][0]
+    df = dataframe['all_data']
     
     
     if doc_type == "FTE_EMESSE":

@@ -122,6 +122,10 @@ def process_fte(self, doc_type, path_folder_csv=None):
         
         df_mth_sum = df[['Imponibile', 'IVA', 'TOTALE', key_grouper]].groupby(
             pd.Grouper(key=key_grouper, freq='ME')).sum().reset_index()
+       
+        
+        df_year_sum = df[['Imponibile', 'IVA', 'TOTALE', key_grouper]].groupby(
+            pd.Grouper(key=key_grouper, freq='YE')).sum().reset_index()
         
         # Dataframe IVA mese
         print()
@@ -140,7 +144,15 @@ def process_fte(self, doc_type, path_folder_csv=None):
         print("Riepilogo mensile dell'IVA delle fatture EMESSE - CUMSUM")
         print(df_mth_cumsum.to_string(index=False))
         
-        return {doc_type: [df, df_mth_sum, df_mth_cumsum, non_abbinati, df_csv_ade, df_ffc]}
+        return {'all_data': df, 
+                'df_mensile': df_mth_sum, 
+                'df_mensile_cumulato': df_mth_cumsum, 
+                'df_annuale': df_year_sum,
+                'df_non_abbinati': non_abbinati,
+                'df_ade': df_csv_ade,
+                'df_ffc': df_ffc
+                
+                }
 
     else:
         print("DataFrame vuoto, nessun dato da elaborare.")

@@ -80,7 +80,12 @@ def process_corrispettivi(self,
         
         
         
-        return df, df_mth_sum, df_mth_cumsum, df_year_sum
+        return {'all_data': df, 
+                'df_mensile': df_mth_sum, 
+                'df_mensile_cumulato': df_mth_cumsum, 
+                'df_annuale': df_year_sum
+                }
+                
     
     else:
         print("DataFrame vuoto, nessun dato da elaborare.")

@@ -22,7 +22,7 @@ def xlsx_corrispettivi(self, dataframe, doc_type="CORRISPETTIVI"):
     if dataframe is None:
         return
     
-    df = dataframe[0] 
+    df = dataframe['all_data'] 
 
     # Assicurati che la colonna 'Data e ora rilevazione' sia in formato datetime
     df['Data e ora rilevazione'] = pd.to_datetime(df['Data e ora rilevazione'], dayfirst=True)
